@@ -1,0 +1,11 @@
+Feature completion
+- `pack` does not split files
+- `check` does basically nothing
+
+Better error messages
+
+Reduce code duplication
+
+Make readable
+
+Additional options and flags
