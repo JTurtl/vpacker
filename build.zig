@@ -16,6 +16,9 @@ pub fn build(b: *std.build.Builder) void {
     exe.setTarget(target);
     exe.setBuildMode(mode);
     exe.install();
+    
+    if (mode != .Debug and mode != .ReleaseSafe)
+        exe.strip = true;
 
     const run_cmd = exe.run();
     run_cmd.step.dependOn(b.getInstallStep());
