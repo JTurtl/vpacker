@@ -126,9 +126,9 @@ pub fn extract(paths: [][:0]const u8) void {
 //TODO: make extract and unpack directly share some functions.
 
 fn extractEntry(entry: common.FullEntry, preload_data: []const u8, main_data: []const u8) void {
-    if (!common.isBlank(entry.directory))
-        std.fs.cwd().makePath(entry.directory)
-            catch |err| fatal("Error creating path: {}", .{err});
+    //if (!common.isBlank(entry.directory))
+    //    std.fs.cwd().makePath(entry.directory)
+    //        catch |err| fatal("Error creating path: {}", .{err});
 
     var file_name_buf: [std.os.PATH_MAX]u8 = undefined;
     const file_name =
