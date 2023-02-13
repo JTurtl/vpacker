@@ -9,7 +9,7 @@ Build commands:
 ```sh
 ~$ git clone https://github.com/jturtl/vpacker
 ~$ cd vpacker
-vpacker$ zig build -Drelease-fast
+vpacker$ zig build
 # static executable at ./zig-out/bin/vpacker
 ```
 
