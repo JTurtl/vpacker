@@ -7,23 +7,27 @@ comptime {
     }
 }
 
-pub fn log(
-    comptime level: std.log.Level,
-    comptime scope: @TypeOf(.EnumLiteral),
-    comptime format: []const u8,
-    args: anytype,
-) void {
-    _ = scope;
-    _ = level;
+pub const std_options = struct {
+    pub fn logFn(
+        comptime level: std.log.Level,
+        comptime scope: @TypeOf(.EnumLiteral),
+        comptime format: []const u8,
+        args: anytype,
+    ) void {
+        _ = scope;
+        _ = level;
 
-    const prefix = "vpacker: ";
+        const prefix = "vpacker: ";
 
-    std.debug.getStderrMutex().lock();
-    defer std.debug.getStderrMutex().unlock();
-    const stderr = std.io.getStdErr().writer();
-    nosuspend stderr.print(prefix ++ format ++ "\n", args)
-        catch return;
-}
+        std.debug.getStderrMutex().lock();
+        defer std.debug.getStderrMutex().unlock();
+        const stderr = std.io.getStdErr().writer();
+        nosuspend stderr.print(prefix ++ format ++ "\n", args)
+            catch return;
+    }
+};
+
+
 
 fn usage() noreturn {
     std.io.getStdErr().writeAll(
