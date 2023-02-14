@@ -99,7 +99,7 @@ pub fn extract(paths: [][:0]const u8) void {
         // don't read the entire file into memory.
         // We can spare a few more syscalls.
         const ex_file = std.fs.cwd().openFile(ex_name, .{})
-            catch |err| fatal("error opening file: {}", .{err});
+            catch |err| fatal("Error opening '{s}': {}", .{ex_name, err});
         defer ex_file.close();
 
         for (found_entries) |entry| {

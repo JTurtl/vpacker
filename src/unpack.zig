@@ -1,3 +1,6 @@
+//todo: unpack options:
+//  verify checksum: make sure MD5 sections are valid
+
 const std = @import("std");
 const common = @import("common.zig");
 
@@ -66,7 +69,7 @@ pub fn unpack(archive_path: [:0]const u8) void {
 
         // Load entire file into memory, why not
         const ex_data = std.fs.cwd().readFileAlloc(common.allocator, ex_name, max_archive_size)
-            catch |err| fatal("err reading: {}", .{err});
+            catch |err| fatal("Couldn't read '{s}': {}", .{ex_name, err});
         defer common.allocator.free(ex_data);
 
         for (entries) |entry| {
