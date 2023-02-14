@@ -9,6 +9,9 @@ pub const VpkFile = struct {
     header: HeaderV2,
     tree_data: []const u8,
     file_data: []const u8,
+    archive_md5_data: []const u8,
+    other_md5_data: []const u8,
+    signature_data: []const u8,
 };
 
 pub const HeaderV2 = packed struct {
@@ -21,6 +24,24 @@ pub const HeaderV2 = packed struct {
     archive_md5_size: u32,
     other_md5_size: u32,
     signature_size: u32,
+};
+
+pub const ArchiveMd5Entry = extern struct {
+    pub const size = 28;
+    archive_index: u32,
+    starting_offset: u32,
+    count: u32,
+    checksum: [16]u8,
+
+    comptime {
+        std.debug.assert(@sizeOf(@This()) == size);
+    }
+};
+
+pub const OtherMd5Entry = extern struct {
+    tree_checksum: [16]u8,
+    archive_md5_checksum: [16]u8,
+    blank: [16]u8,
 };
 
 pub const Entry = packed struct {
@@ -206,11 +227,51 @@ pub fn readDirectoryFile(path: [:0]const u8) VpkFile {
     }
 
     const tree_data = all_data_after_header[0..header.tree_size];
-    const file_data = all_data_after_header[header.tree_size..header.tree_size+header.file_data_size];
-    //print("tree size: {}, file data size: {}\n", .{tree_data.len, file_data.len});
+
+    const file_data_end = header.tree_size + header.file_data_size;
+    const file_data = all_data_after_header[header.tree_size..file_data_end];
+
+    const amd5_end = file_data_end + header.archive_md5_size;
+    const archive_md5_data = all_data_after_header[file_data_end..amd5_end];
+
+    const omd5_end = amd5_end + header.other_md5_size;
+    const other_md5_data = all_data_after_header[amd5_end..omd5_end];
+
+    const signature_end = omd5_end + header.signature_size;
+    const signature_data = all_data_after_header[omd5_end..signature_end];
+
+    // Verify the tree data MD5
+    // disabled because i dont want to do this check here,
+    // but will need this code later
+    // remove this when MD5 checks are implemented.
+//     var outbuf: [16]u8 = undefined;
+//     std.crypto.hash.Md5.hash(tree_data, &outbuf, .{});
+//
+//     const omd5 = @ptrCast(
+//         *const align(1) OtherMd5Entry,
+//         other_md5_data.ptr,
+//     );
+//     const b64 = std.base64.Base64Encoder.init(std.base64.standard_alphabet_chars, null);
+//     // zig is being silly and can't comptime resolve calcSize without... this
+//     const sz = comptime blk: { break :blk std.base64.Base64Encoder.init(std.base64.standard_alphabet_chars, null).calcSize(16); };
+//     var buf0: [sz]u8 = undefined;
+//     var buf1: [sz]u8 = undefined;
+//     _ = b64.encode(&buf0, &omd5.tree_checksum);
+//     _ = b64.encode(&buf1, &outbuf);
+//
+//     std.debug.print("EXPECTED: {s}\nACTUAL: {s}\n", .{&buf0, &buf1});
+//     if (std.mem.eql(u8, &outbuf, &omd5.tree_checksum)) {
+//         std.debug.print("success!\n", .{});
+//     } else {
+//         std.debug.print("oh no!\n", .{});
+//     }
+
     return .{
         .header = header,
         .tree_data = tree_data,
         .file_data = file_data,
+        .archive_md5_data = archive_md5_data,
+        .other_md5_data = other_md5_data,
+        .signature_data = signature_data,
     };
 }

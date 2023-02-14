@@ -1,4 +1,7 @@
 //todo: rewrite to be less convoluted
+//todo: pack options:
+//  max archive size (default 200MiB): split archives wont exceed this size
+//
 
 const std = @import("std");
 const common = @import("common.zig");
@@ -85,9 +88,13 @@ pub fn pack(directory_path: [:0]const u8) void {
     // File data size
     writer.writeIntLittle(u32, @intCast(u32, file_data.items.len)) catch unreachable;
     
-    // Some bullshit
+    // Archive MD5 chunk size (always 0 for single-file archives)
     writer.writeIntLittle(u32, 0) catch unreachable;
-    writer.writeIntLittle(u32, 0) catch unreachable;
+
+    // Other MD5 chunk size (always 48)
+    writer.writeIntLittle(u32, 48) catch unreachable;
+
+    // Signature size (who cares?)
     writer.writeIntLittle(u32, 0) catch unreachable;
 
     archive_file.writeAll(&header_buf)
@@ -98,6 +105,22 @@ pub fn pack(directory_path: [:0]const u8) void {
 
     archive_file.writeAll(file_data.items)
         catch |err| fatal("File.writeAll: {}", .{err});
+
+
+
+    // Create the tree data checksum
+    var tree_checksum_buf: [16]u8 = undefined;
+    std.crypto.hash.Md5.hash(tree.items, &tree_checksum_buf, .{});
+    archive_file.writeAll(&tree_checksum_buf) catch unreachable;
+
+    // no archive checksum chunk yet, just hash an empty block
+    // this seems to be what other tools do for single-file archives
+    var archive_checksum_buf: [16]u8 = undefined;
+    std.crypto.hash.Md5.hash(&[0]u8{}, &archive_checksum_buf, .{});
+    archive_file.writer().writeAll(&archive_checksum_buf) catch unreachable;
+
+    // trailing useless data
+    archive_file.writer().writeByteNTimes(0, 16) catch unreachable;
 
     archive_file.close();
 }
