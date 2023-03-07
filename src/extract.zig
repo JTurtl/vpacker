@@ -31,7 +31,7 @@ pub fn extract(paths: [][:0]const u8) void {
         const name = std.fmt.bufPrint(&name_buf, "{}", .{entry})
             catch oom();
         
-        for (search_paths) |fname, i| {
+        for (search_paths, 0..) |fname, i| {
             if (std.mem.eql(u8, name, fname)) {
                 found_flags[i] = true;
                 found_entries[i] = entry;
@@ -39,7 +39,7 @@ pub fn extract(paths: [][:0]const u8) void {
         }
     }
 
-    for (found_flags) |f, i| {
+    for (found_flags, 0..) |f, i| {
         if (!f) {
             fatal("file \"{s}\" not found", .{search_paths[i]});
         }
