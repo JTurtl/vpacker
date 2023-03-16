@@ -3,7 +3,7 @@
 
 ## **Building from source**
 Requirements:
-- Recent Zig compiler
+- Recent Zig compiler (v0.11.0-dev, [https://ziglang.org/download](https://ziglang.org/download/))
 
 Build commands:
 ```sh
