@@ -3,16 +3,16 @@ const std = @import("std");
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     //const optimize = b.standardOptimizeOption(.{});
-    const optimize = .ReleaseSafe;
+    const optimize = .ReleaseSmall;
     const exe = b.addExecutable(.{
         .name = "vpacker",
         .root_source_file = .{.path="src/main.zig"},
         .target = target,
         .optimize = optimize,
     });
-    exe.install();
+    b.installArtifact(exe);
     
-    const run_cmd = exe.run();
+    const run_cmd = b.addRunArtifact(exe);
     run_cmd.step.dependOn(b.getInstallStep());
     if (b.args) |args| {
         run_cmd.addArgs(args);

@@ -17,7 +17,7 @@ pub fn extract(paths: [][:0]const u8) void {
     const found_flags = common.allocator.alloc(bool, search_paths.len)
         catch oom();
 
-    std.mem.set(bool, found_flags, false);
+    @memset(found_flags, false);
 
     const found_entries = common.allocator.alloc(common.FullEntry, search_paths.len)
         catch oom();
