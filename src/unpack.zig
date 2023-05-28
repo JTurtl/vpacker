@@ -29,7 +29,6 @@ pub fn unpack(archive_path: [:0]const u8) void {
     entries = common.getAllEntries(archive.tree_data);
 
     makeDir(basename);
-    chdir(basename);
 
     // All local files first
     var max_archive_index: ?u16 = null;
@@ -72,11 +71,15 @@ pub fn unpack(archive_path: [:0]const u8) void {
             catch |err| fatal("Couldn't read '{s}': {}", .{ex_name, err});
         defer common.allocator.free(ex_data);
 
+        chdir(basename);
+
         for (entries) |entry| {
             if (entry.data.archive == archive_idx) {
                 extractEntry(entry, ex_data);
             }
         }
+
+        chdir("..");
     }
 }
 
